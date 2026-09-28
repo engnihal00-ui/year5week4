@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Code Quest: Loop &amp; If Challenge</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{
+  --navy:#151a35; --navy2:#1f2650; --teal:#1fd6b8; --coral:#ff6f61; --amber:#ffb84d;
+  --ink:#eef2ff; --dim:#a9b2d9; --card:#232a58; --good:#33d17a; --bad:#ff5d6c;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html{height:100%; scroll-padding-top:env(safe-area-inset-top,0px);}
+body{
+  margin:0; min-height:100%; background:
+    radial-gradient(1200px 600px at 15% -10%, #2a3270 0%, transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, #17356b 0%, transparent 55%),
+    var(--navy);
+  color:var(--ink); font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+}
+.wrap{max-width:900px; margin:0 auto; padding:18px 16px 60px;}
+header{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;}
+.title{display:flex; align-items:center; gap:10px;}
+.title h1{font-size:1.4rem; margin:0; letter-spacing:.2px;}
+.title span.tag{font-size:.65rem; color:var(--dim); display:block; font-weight:normal;}
+.hud{display:flex; gap:10px; flex-wrap:wrap;}
+.pill{background:var(--card); border:1px solid #333d76; border-radius:999px; padding:6px 14px; font-size:.85rem; font-weight:600;}
+.pill.score{color:var(--amber)} .pill.streak{color:var(--coral)} .pill.mission{color:var(--teal)}
+.path{display:flex; gap:6px; margin:14px 0 20px;}
+.node{flex:1; height:8px; border-radius:6px; background:#2b3268;}
+.node.done{background:var(--teal);} .node.active{background:var(--amber);}
+.card{background:var(--card); border:1px solid #333d76; border-radius:16px; padding:22px; min-height:260px; box-shadow:0 10px 30px rgba(0,0,0,.35);}
+.mission-badge{display:inline-block; background:#17356b; color:var(--teal); font-size:.75rem; font-weight:700; padding:4px 10px; border-radius:8px; margin-bottom:10px;}
+.prompt{font-size:1.15rem; line-height:1.5; margin:6px 0 18px;}
+.code-line{font-family:Consolas,monospace; background:#0f1330; border:1px solid #333d76; color:var(--teal); padding:10px 14px; border-radius:10px; margin:10px 0; font-size:1rem;}
+.options{display:grid; gap:10px; grid-template-columns:1fr 1fr;}
+@media(max-width:560px){.options{grid-template-columns:1fr}}
+.opt{background:#1a2050; border:2px solid #333d76; color:var(--ink); padding:14px 16px; border-radius:12px; cursor:pointer; font-size:1rem; text-align:left; transition:border-color .15s, transform .1s;}
+.opt:hover{border-color:var(--teal);}
+.opt:active{transform:scale(.98);}
+.opt.correct{border-color:var(--good); background:#123a2a;}
+.opt.wrong{border-color:var(--bad); background:#3a1418;}
+.feedback{margin-top:16px; padding:12px 14px; border-radius:10px; font-size:.95rem; display:none;}
+.feedback.show{display:block;}
+.feedback.hint{background:#3a2c10; border:1px solid var(--amber); color:#ffd88a;}
+.feedback.explain{background:#12203a; border:1px solid var(--teal); color:#bfeee6;}
+.controls{display:flex; justify-content:space-between; margin-top:20px; gap:10px; flex-wrap:wrap;}
+button.nav{background:var(--teal); color:#08221c; border:none; padding:12px 22px; border-radius:10px; font-weight:700; cursor:pointer; font-size:1rem;}
+button.nav:disabled{opacity:.35; cursor:not-allowed;}
+button.ghost{background:transparent; border:1px solid #333d76; color:var(--dim); padding:12px 18px; border-radius:10px; cursor:pointer;}
+.badges{display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;}
+.badge{background:#17356b; color:var(--amber); font-size:.8rem; padding:5px 10px; border-radius:8px; opacity:.35;}
+.badge.earned{opacity:1;}
+.checklist{list-style:none; padding:0; margin:0;}
+.checklist li{padding:8px 0; border-bottom:1px solid #2b3268; display:flex; gap:10px; align-items:center;}
+.checklist input{width:20px; height:20px;}
+.skillbar{margin:10px 0;}
+.skillbar .lbl{display:flex; justify-content:space-between; font-size:.85rem; margin-bottom:4px; color:var(--dim);}
+.skillbar .track{background:#0f1330; border-radius:6px; height:10px; overflow:hidden;}
+.skillbar .fill{height:100%; background:var(--teal);}
+.name-input{width:100%; padding:10px; border-radius:8px; border:1px solid #333d76; background:#0f1330; color:var(--ink); font-size:1rem; margin:8px 0;}
+.score-grid{display:grid; grid-template-columns:1fr auto; gap:8px 14px; align-items:center; margin:12px 0;}
+.score-grid input{width:70px; padding:6px; border-radius:6px; border:1px solid #333d76; background:#0f1330; color:var(--ink); text-align:center;}
+.big{font-size:2rem; font-weight:800; color:var(--amber);}
+.note{color:var(--dim); font-size:.85rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="title">
+    <div style="font-size:1.8rem;">🤖</div>
+    <div><h1>Code Quest</h1><span class="tag">Loop &amp; If Challenge · Year 5 · Cambridge 0059 Stage 5</span></div>
+  </div>
+  <div class="hud">
+    <div class="pill score">⭐ <span id="scoreDisp">0</span>/<span id="scoreMax">0</span></div>
+    <div class="pill streak">🔥 <span id="streakDisp">0</span></div>
+    <div class="pill mission">🏆 <span id="missionDisp">1</span>/6</div>
+  </div>
+</header>
+<div class="path" id="pathBar"></div>
+<div class="card" id="card"></div>
+<div class="badges" id="badges"></div>
+</div>
+
+<script>
+const badgeDefs = [
+  {id:'decomp', label:'🧩 Decomposition Detective'},
+  {id:'loop', label:'🔁 Loop Master'},
+  {id:'debug', label:'🤖 Debugging Hero'},
+  {id:'explorer', label:'⚡ Coding Explorer'}
+];
+let earned = new Set();
+
+// Each question: prompt, optional codeLine, options[], correctIndex, hint, explain, skill
+const missions = [
+  { name:"Coding Warm-Up", icon:"🚀", badge:'explorer', qs:[
+    {p:"What does a LOOP do in a program?", opts:["Repeats an action a set number of times","Makes a one-off decision","Deletes the code","Changes the sprite's colour permanently"], correct:0,
+     hint:"Think about the word 'repeat'.", explain:"A loop repeats an action, like moving forward 10 times.", skill:'loop'},
+    {p:"An 'if' block is an example of...", opts:["A loop","Selection","Decomposition","A variable"], correct:1,
+     hint:"It checks a condition and chooses what happens next.", explain:"'If' blocks are selection — they make the program choose based on a condition.", skill:'if'}
+  ]},
+  { name:"Decomposition Detective", icon:"🧩", badge:'decomp', qs:[
+    {p:"Problem: 'A sprite must move forward repeatedly and react differently when it reaches the edge.' Which is the FIRST decomposed part?", opts:["Respond according to the condition","Move repeatedly","Check whether the sprite reaches the edge","Draw the background"], correct:1,
+     hint:"What has to happen over and over, before anything else?", explain:"Part 1 is 'move repeatedly' — this becomes the loop.", skill:'decomp'},
+    {p:"In that same problem, 'check whether the sprite reaches the edge' will become which structure?", opts:["A loop","A selection (if) block","A variable","A sound block"], correct:1,
+     hint:"Checking something is true or false is a condition.", explain:"Checking a condition is selection — it becomes the 'if' block.", skill:'decomp'}
+  ]},
+  { name:"Loop or If?", icon:"🔀", badge:'loop', qs:[
+    {p:"Classify this block:", code:"repeat 10 times", opts:["🟢 LOOP","🔵 SELECTION","🟡 NEITHER"], correct:0,
+     hint:"Does it repeat, or does it check a condition?", explain:"'Repeat 10 times' is a count-controlled loop.", skill:'loop'},
+    {p:"Classify this block:", code:"if touching edge then...", opts:["🟢 LOOP","🔵 SELECTION","🟡 NEITHER"], correct:1,
+     hint:"This checks something before deciding what to do.", explain:"'If touching edge' is selection — a condition is being checked.", skill:'if'},
+    {p:"Classify this block:", code:"say 'Hello!'", opts:["🟢 LOOP","🔵 SELECTION","🟡 NEITHER"], correct:2,
+     hint:"Does this repeat or check anything?", explain:"It just runs once with no repeat or condition — neither.", skill:'loop'}
+  ]},
+  { name:"Build the Code", icon:"🧱", badge:'loop', qs:[
+    {p:"Which arrangement correctly combines a LOOP and a SELECTION to solve: 'move forward repeatedly, say something different at the edge'?",
+     code:"A) repeat { move; if touching edge: say 'Ouch!' }", opts:["This arrangement (A)","Just: if touching edge: say 'Ouch!'","Just: repeat { move }","if touching edge: repeat { move }"], correct:0,
+     hint:"Both the loop AND the if need to be present, with if inside the repeat.", explain:"The 'if' sits inside the 'repeat' loop, so it's checked every time it moves.", skill:'combine'}
+  ]},
+  { name:"Debug the Robot", icon:"🐞", badge:'debug', qs:[
+    {p:"Bug: the 'if touching edge' block is placed OUTSIDE the repeat loop. Why does this fail?", opts:["It will check the condition only once, not every repeat","It will crash the program","It will run twice as fast","Nothing — it still works perfectly"], correct:0,
+     hint:"Where does the checking need to happen for it to work every loop?", explain:"Outside the loop, the condition is checked only once, so the sprite won't respond every time it moves.", skill:'debug'},
+    {p:"Bug: there is no repeat/loop block at all, just one 'move' and one 'if'. What's missing?", opts:["A sound block","A structure to make the movement repeat","A background","A variable"], correct:1,
+     hint:"The sprite needs to keep moving, not move just once.", explain:"Without a loop, the sprite only moves once instead of repeatedly.", skill:'debug'}
+  ]},
+  { name:"Decompose → Code → Test", icon:"🧪", badge:'debug', qs:[
+    {p:"New problem: 'A character should repeat an action and respond differently when a condition becomes true.' Which decomposition is correct?", opts:["Part A: repeat the action. Part B: check the condition and respond.","Part A: respond. Part B: repeat the response.","Part A: draw the character. Part B: name the character.","Part A: check condition. Part B: delete the loop."], correct:0,
+     hint:"Match each part to either the loop or the selection.", explain:"Part A becomes the loop, Part B becomes the selection — then they're combined and tested.", skill:'combine'}
+  ]}
+];
+
+let mi=0, qi=0, attempts=0, score=0, maxScore=0, streak=0;
+missions.forEach(m=>maxScore+=m.qs.length);
+document.getElementById('scoreMax').textContent = maxScore;
+
+function shuffle(opts, correct){
+  const idx = opts.map((t,i)=>i);
+  for(let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}
+  return {opts: idx.map(i=>opts[i]), correct: idx.indexOf(correct)};
+}
+
+function renderPath(){
+  const bar = document.getElementById('pathBar'); bar.innerHTML='';
+  missions.forEach((m,i)=>{
+    const d=document.createElement('div');
+    d.className='node'+(i<mi?' done':i===mi?' active':'');
+    bar.appendChild(d);
+  });
+}
+function renderBadges(){
+  const b=document.getElementById('badges'); b.innerHTML='';
+  badgeDefs.forEach(bd=>{
+    const el=document.createElement('div');
+    el.className='badge'+(earned.has(bd.id)?' earned':'');
+    el.textContent=bd.label; b.appendChild(el);
+  });
+}
+
+function renderQuestion(){
+  document.getElementById('missionDisp').textContent = mi+1;
+  document.getElementById('scoreDisp').textContent = score;
+  document.getElementById('streakDisp').textContent = streak;
+  renderPath();
+  const m = missions[mi], q = m.qs[qi];
+  attempts = 0;
+  const s = shuffle(q.opts, q.correct);
+  const card = document.getElementById('card');
+  card.innerHTML = `
+    <div class="mission-badge">${m.icon} Mission ${mi+1}: ${m.name} · Q${qi+1}/${m.qs.length}</div>
+    <div class="prompt">${q.p}</div>
+    ${q.code?`<div class="code-line">${q.code}</div>`:''}
+    <div class="options" id="optsBox"></div>
+    <div class="feedback hint" id="hintBox"></div>
+    <div class="feedback explain" id="explainBox"></div>
+    <div class="controls">
+      <button class="ghost" id="skipBtn">Skip</button>
+      <button class="nav" id="nextBtn" disabled>Next →</button>
+    </div>`;
+  const box = document.getElementById('optsBox');
+  s.opts.forEach((text,i)=>{
+    const b=document.createElement('button');
+    b.className='opt'; b.textContent=text;
+    b.onclick=()=>answer(i, s.correct, q, b, box);
+    box.appendChild(b);
+  });
+  document.getElementById('skipBtn').onclick=advance;
+  document.getElementById('nextBtn').onclick=advance;
+}
+
+function answer(chosen, correctIdx, q, btn, box){
+  const buttons = [...box.children];
+  if(btn.classList.contains('correct')||btn.classList.contains('wrong')) return;
+  attempts++;
+  if(chosen===correctIdx){
+    btn.classList.add('correct');
+    if(attempts===1){ score++; streak++; }
+    document.getElementById('explainBox').textContent = "✅ Correct! "+q.explain;
+    document.getElementById('explainBox').classList.add('show');
+    if(q.skill==='decomp') earned.add('decomp');
+    if(q.skill==='loop') earned.add('loop');
+    if(q.skill==='debug') earned.add('debug');
+    earned.add('explorer');
+    renderBadges();
+    buttons.forEach(b=>b.onclick=null);
+    document.getElementById('nextBtn').disabled=false;
+    document.getElementById('scoreDisp').textContent=score;
+    document.getElementById('streakDisp').textContent=streak;
+  } else {
+    btn.classList.add('wrong'); streak=0;
+    document.getElementById('streakDisp').textContent=streak;
+    if(attempts===1){
+      const hb=document.getElementById('hintBox');
+      hb.textContent="🔍 Check my mistake: "+q.hint+" Try again!";
+      hb.classList.add('show');
+      btn.onclick=null;
+    } else {
+      buttons[correctIdx] && buttons.forEach((b,i)=>{if(i===correctIdx)b.classList.add('correct');});
+      document.getElementById('explainBox').textContent = "Correct answer explained: "+q.explain;
+      document.getElementById('explainBox').classList.add('show');
+      buttons.forEach(b=>b.onclick=null);
+      document.getElementById('nextBtn').disabled=false;
+    }
+  }
+}
+
+function advance(){
+  qi++;
+  if(qi>=missions[mi].qs.length){
+    mi++; qi=0;
+    if(mi>=missions.length){ renderPractical(); return; }
+  }
+  renderQuestion();
+}
+
+function renderPractical(){
+  renderPath();
+  document.getElementById('card').innerHTML = `
+    <div class="mission-badge">🖥️ Final Mission: PictoBlox Coding Challenge</div>
+    <div class="prompt">In pairs: build a sprite that repeats a movement AND uses an IF to respond differently at an edge. Decompose first (2–3 parts) on paper, then code it in PictoBlox.</div>
+    <ul class="checklist">
+      <li><input type="checkbox"> I decomposed the problem first</li>
+      <li><input type="checkbox"> I used a loop</li>
+      <li><input type="checkbox"> I used an if/selection block</li>
+      <li><input type="checkbox"> I combined them correctly</li>
+      <li><input type="checkbox"> I tested my program</li>
+      <li><input type="checkbox"> I fixed a problem if needed</li>
+      <li><input type="checkbox"> I can explain my code</li>
+    </ul>
+    <p class="note">Teacher: score the pair's practical work below, then continue to results.</p>
+    <div class="score-grid">
+      <div>Decomposition (2)</div><input type="number" id="p1" min="0" max="2" value="2">
+      <div>Loop (2)</div><input type="number" id="p2" min="0" max="2" value="2">
+      <div>Selection/IF (2)</div><input type="number" id="p3" min="0" max="2" value="2">
+      <div>Combination (2)</div><input type="number" id="p4" min="0" max="2" value="2">
+      <div>Testing/debugging (1)</div><input type="number" id="p5" min="0" max="1" value="1">
+      <div>Explanation (1)</div><input type="number" id="p6" min="0" max="1" value="1">
+    </div>
+    <div class="name-input-wrap"><label class="note">Student/pair name</label><input class="name-input" id="studentName" placeholder="e.g. Amira &amp; Youssef"></div>
+    <div class="controls"><div></div><button class="nav" id="finishBtn">See Results 🎉</button></div>`;
+  document.getElementById('finishBtn').onclick=renderResults;
+}
+
+function renderResults(){
+  const p = ['p1','p2','p3','p4','p5','p6'].reduce((s,id)=>s+Number(document.getElementById(id).value||0),0);
+  const name = document.getElementById('studentName').value || 'Coder';
+  const overall = Math.round(((score+p)/(maxScore+10))*100);
+  const skillScore = skill => { let c=0,t=0; missions.forEach(m=>m.qs.forEach(q=>{if(q.skill===skill){t++;}})); return t; };
+  let msg = overall>=80 ? "Excellent coding thinking! You can break problems into smaller parts and combine loops with selection effectively."
+    : overall>=50 ? "Good progress! Review how loops repeat actions and how IF blocks make decisions based on conditions."
+    : "Keep practising decomposition first. Break the problem into smaller parts before choosing your coding blocks.";
+  document.getElementById('card').innerHTML = `
+    <div class="mission-badge">🎉 Coding Quest Complete!</div>
+    <div class="prompt">${name}</div>
+    <div class="big">${overall}%</div>
+    <p>Quiz: ${score}/${maxScore} &nbsp;·&nbsp; Practical: ${p}/10</p>
+    <div class="skillbar"><div class="lbl"><span>🧩 Decomposition</span></div><div class="track"><div class="fill" style="width:${(document.getElementById('p1').value/2)*100}%"></div></div></div>
+    <div class="skillbar"><div class="lbl"><span>🔁 Loops</span></div><div class="track"><div class="fill" style="width:${(document.getElementById('p2').value/2)*100}%"></div></div></div>
+    <div class="skillbar"><div class="lbl"><span>🔀 Selection/IF</span></div><div class="track"><div class="fill" style="width:${(document.getElementById('p3').value/2)*100}%"></div></div></div>
+    <div class="skillbar"><div class="lbl"><span>🔗 Combining</span></div><div class="track"><div class="fill" style="width:${(document.getElementById('p4').value/2)*100}%"></div></div></div>
+    <div class="skillbar"><div class="lbl"><span>🐞 Test &amp; debug</span></div><div class="track"><div class="fill" style="width:${(document.getElementById('p5').value/1)*100}%"></div></div></div>
+    <div class="feedback explain show">${msg}</div>
+    <div class="feedback hint show">🗣️ Think–Pair–Share: Explain to your partner — which part of your program is the loop? Which is the selection? Why did you need both?</div>
+    <p class="note">Cambridge Primary Computing 0059, Stage 5 · 4CT.02 / 4P.03</p>`;
+  renderBadges();
+}
+
+renderQuestion();
+renderBadges();
+</script>
+</body>
+</html>
